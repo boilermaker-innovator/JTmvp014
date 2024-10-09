@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gifylink - Job Teaser Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+        }
+        form {
+            display: grid;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #003d82;
+        }
+        .preview-container {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #0056b3;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gifylink - Job Teaser Creator</h1>
+        <form id="jobTeaserForm">
+            <label for="companyName">Company Name:</label>
+            <input type="text" id="companyName" name="companyName" required>
+
+            <label for="jobTitle">Job Title:</label>
+            <input type="text" id="jobTitle" name="jobTitle" required>
+
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" required>
+
+            <label for="logoUrl">Logo URL:</label>
+            <input type="url" id="logoUrl" name="logoUrl" required>
+
+            <label for="tab1Content">Overview:</label>
+            <textarea id="tab1Content" name="tab1Content" required></textarea>
+
+            <label for="tab2Content">Role:</label>
+            <textarea id="tab2Content" name="tab2Content" required></textarea>
+
+            <label for="tab3Content">Requirements:</label>
+            <textarea id="tab3Content" name="tab3Content" required></textarea>
+
+            <label for="tab4Content">Benefits:</label>
+            <textarea id="tab4Content" name="tab4Content" required></textarea>
+
+            <label for="applyUrl">Full Job Ad URL:</label>
+            <input type="url" id="applyUrl" name="applyUrl" required>
+
+            <button type="submit">Create Teaser</button>
+        </form>
+
+        <div class="preview-container" id="previewContainer" style="display:none;">
+            <h2>Preview</h2>
+            <div id="teaserPreview"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('jobTeaserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const teaserData = Object.fromEntries(formData);
+
+            // Save to localStorage
+            let savedTeasers = JSON.parse(localStorage.getItem('jobTeasers')) || [];
+            savedTeasers.push(teaserData);
+            localStorage.setItem('jobTeasers', JSON.stringify(savedTeasers));
+
+            // Show preview
+            showPreview(teaserData);
+        });
+
+        function showPreview(data) {
+            const previewContainer = document.getElementById('previewContainer');
+            const teaserPreview = document.getElementById('teaserPreview');
+
+            teaserPreview.innerHTML = `
+                <h3>${data.jobTitle}</h3>
+                <p>${data.companyName} - ${data.location}</p>
+                <img src="${data.logoUrl}" alt="${data.companyName} Logo" style="max-width:100px; max-height:100px;">
+                <div class="tab">
+                    <button class="tablinks" onclick="openTab(event, 'previewOverview')">Overview</button>
+                    <button class="tablinks" onclick="openTab(event, 'previewRole')">Role</button>
+                    <button class="tablinks" onclick="openTab(event, 'previewRequirements')">Requirements</button>
+                    <button class="tablinks" onclick="openTab(event, 'previewBenefits')">Benefits</button>
+                </div>
+                <div id="previewOverview" class="tabcontent">${data.tab1Content}</div>
+                <div id="previewRole" class="tabcontent">${data.tab2Content}</div>
+                <div id="previewRequirements" class="tabcontent">${data.tab3Content}</div>
+                <div id="previewBenefits" class="tabcontent">${data.tab4Content}</div>
+                <button onclick="window.open('${data.applyUrl}', '_blank')">View Full Job Ad</button>
+            `;
+
+            previewContainer.style.display = 'block';
+            openTab(null, 'previewOverview');
+        }
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            if (evt) evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
